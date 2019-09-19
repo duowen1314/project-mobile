@@ -3,37 +3,88 @@
     <!-- 导航栏 -->
     <van-nav-bar title="登录" />
     <!-- 输入表单 -->
+
+    <!-- test -->
+    <!--
+  ValidationProvider是验证插件提供的一个全局组件
+  rules="secret"配置验证规则
+  v-slot="{ errors }获取验证相关的结构参数
+  {{ errors[0] }}用来获取验证失败的错误消息
+    -->
+    <!-- <ValidationProvider rules="required"  v-slot="{ errors }">
+  <input v-model="user.mobile" type="text">
+  <span>{{ errors[0] }}</span>
+    </ValidationProvider>-->
+
     <!-- 通过 class-prefix 指定类名为 my-icon -->
-    <van-cell-group class="form-box">
-      <van-row type="flex" align="center" class="form-item">
-        <van-col>
-          <van-icon class-prefix="my-icon" name="extra" />
-        </van-col>
-        <van-col>
-          <van-field clearable placeholder="请输入手机号" />
-        </van-col>
-      </van-row>
-      <van-row type="flex" align="center" class="form-item form-code">
-        <van-col>
-          <van-icon class-prefix="my-icon" name="extra2" />
-        </van-col>
-        <van-col>
-          <van-field type="text" placeholder="请输入验证码" />
-        </van-col>
-        <van-col offset="2" class="btn-item">
-          <van-button style round type="default" class="yzm-btn">获取验证码</van-button>
-        </van-col>
-      </van-row>
-    </van-cell-group>
+      <ValidationObserver tag="form" ref="loginForm">
+        <ValidationProvider tag="div" name="手机号" rules="required|phone" v-slot="{ errors }">
+          <van-field
+            v-model="user.mobile"
+            clearable
+            label="手机号"
+            placeholder="请输入手机号"
+            :error-message="errors[0]"
+          />
+        </ValidationProvider>
+        <ValidationProvider tag="div" name="验证码" rules="required|code" v-slot="{ errors }">
+          <van-field
+            v-model="user.code"
+            type="password"
+            label="验证码"
+            placeholder="请输入验证码"
+            :error-message="errors[0]"
+          />
+        </ValidationProvider>
+      </ValidationObserver>
     <van-row class="form-login-btn">
-      <van-button type="info" style="width:100%;background:#6db4fb;border:none;">登录</van-button>
+      <van-button
+        :loading="isLoading"
+        @click="onLogin"
+        type="info"
+        style="width:100%;background:#6db4fb;border:none;"
+      >登录</van-button>
     </van-row>
   </div>
 </template>
 
 <script>
+import { login } from '@/api/user'
+
 export default {
-  name: 'LoginIndex'
+  name: 'LoginIndex',
+  data () {
+    return {
+      isLoading: false,
+      user: {
+        mobile: '15210427152',
+        code: '246810'
+      }
+    }
+  },
+  methods: {
+    // 登录
+    async onLogin () {
+      this.isLoading = true
+      try {
+        const isValid = await this.$refs.loginForm.validate()
+        // this.isLoading = false
+        console.log(isValid)
+        if (!isValid) {
+          return
+        }
+
+        const { res } = await login(this.user)
+        console.log(res)
+        this.$toast.success('登录成功')
+      } catch (err) {
+        if (err.response && err.response.status === 400) {
+          this.$toast.fail('登录失败，手机号或验证码错误')
+        }
+      }
+      this.isLoading = false
+    }
+  }
 }
 </script>
 
@@ -67,9 +118,9 @@ export default {
       }
     }
   }
-  .form-login-btn{
-    padding:10px;
-    margin-top:20px;
+  .form-login-btn {
+    padding: 10px;
+    margin-top: 20px;
   }
 }
 </style>
