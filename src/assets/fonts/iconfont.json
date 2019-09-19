@@ -1,0 +1,23 @@
+{
+  "id": "1423694",
+  "name": "duo",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "584112",
+      "name": "验证码",
+      "font_class": "iconfontmima1",
+      "unicode": "e616",
+      "unicode_decimal": 58902
+    },
+    {
+      "icon_id": "666888",
+      "name": "手机",
+      "font_class": "shouji",
+      "unicode": "e692",
+      "unicode_decimal": 59026
+    }
+  ]
+}

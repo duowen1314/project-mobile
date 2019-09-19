@@ -8,7 +8,7 @@ const router = new VueRouter({
   // 配置路由表
   routes: [
     {
-      name: 'login',
+      name: 'login', // 登录路由
       path: '/login',
       component: Login
     }
