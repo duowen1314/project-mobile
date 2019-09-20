@@ -17,6 +17,7 @@
     </ValidationProvider>-->
 
     <!-- 通过 class-prefix 指定类名为 my-icon -->
+    <!-- 通过vant VeeValidate组件校验的方式 -->
       <ValidationObserver tag="form" ref="loginForm">
         <ValidationProvider tag="div" name="手机号" rules="required|phone" v-slot="{ errors }">
           <van-field
@@ -50,6 +51,7 @@
 
 <script>
 import { login } from '@/api/user'
+import { mapMutations } from 'vuex'
 
 export default {
   name: 'LoginIndex',
@@ -63,20 +65,24 @@ export default {
     }
   },
   methods: {
-    // 登录
+    ...mapMutations(['setUser']),
+    // 登录请求
     async onLogin () {
       this.isLoading = true
       try {
         const isValid = await this.$refs.loginForm.validate()
-        // this.isLoading = false
-        console.log(isValid)
         if (!isValid) {
+          // 如果校验不成功，去掉加载状态，并且也不要发送请求
+          this.isLoading = false
           return
         }
 
-        const { res } = await login(this.user)
-        console.log(res)
+        // 通过结构的方式 直接拿到数据
+        const { data } = await login(this.user) // ?
+        console.log(data)
         this.$toast.success('登录成功')
+        // 登录成功后 设置token
+        this.setUser(data.data)
       } catch (err) {
         if (err.response && err.response.status === 400) {
           this.$toast.fail('登录失败，手机号或验证码错误')
