@@ -51,7 +51,7 @@
 
 <script>
 import { login } from '@/api/user'
-import { mapMutations } from 'vuex'
+// import { mapMutations } from 'vuex'
 
 export default {
   name: 'LoginIndex',
@@ -65,7 +65,7 @@ export default {
     }
   },
   methods: {
-    ...mapMutations(['setUser']),
+    // ...mapMutations(['setUser']),
     // 登录请求
     async onLogin () {
       this.isLoading = true
@@ -80,9 +80,11 @@ export default {
         // 通过结构的方式 直接拿到数据
         const { data } = await login(this.user) // ?
         console.log(data)
-        this.$toast.success('登录成功')
         // 登录成功后 设置token
-        this.setUser(data.data)
+        // this.setUser(data.data)
+        this.$store.commit('setUser', data.data)
+
+        this.$toast.success('登录成功')
       } catch (err) {
         if (err.response && err.response.status === 400) {
           this.$toast.fail('登录失败，手机号或验证码错误')

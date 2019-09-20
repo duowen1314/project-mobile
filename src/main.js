@@ -7,7 +7,6 @@ import zhCN from 'vee-validate/dist/locale/zh_CN' // 加载验证插件的语言
 import * as rules from 'vee-validate/dist/rules'
 import './assets/fonts/iconfont.css'
 import './styles/index.css'
-
 import {
   Button,
   Icon,
@@ -18,7 +17,9 @@ import {
   Row,
   Col,
   Toast,
-  Loading
+  Loading,
+  Tabbar,
+  TabbarItem
 } from 'vant'// 按需注册 Vant 组件
 
 // 链式使用
@@ -33,6 +34,8 @@ Vue
   .use(Col)
   .use(Toast)
   .use(Loading)
+  .use(Tabbar)
+  .use(TabbarItem)
 
 Vue.config.productionTip = false
 

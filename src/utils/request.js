@@ -1,5 +1,6 @@
 // 请求模块：封装axios
 import axios from 'axios'
+import store from '@/store'
 
 // 配置处理后端返回的数据中包含超出js安全整数范围
 import JSONbig from 'json-bigint'
@@ -10,6 +11,33 @@ const request = axios.create({
   baseURL: 'http://ttapi.research.itcast.cn'
 })
 
+// 使用拦截器统一添加token,在加载容器
+// Add a request interceptor
+request.interceptors.request.use(function (config) {
+  console.log(config)
+  const { user } = store.state
+  if (user) {
+    config.headers.Authorization = `Bearer${user.token}`
+  }
+  // Do something before request is sent
+  return config
+}, function (error) {
+  // Do something with request error
+  return Promise.reject(error)
+})
+
+// Add a response interceptor
+request.interceptors.response.use(function (response) {
+  // Any status code that lie within the range of 2xx cause this function to trigger
+  // Do something with response data
+  return response
+}, function (error) {
+  // Any status codes that falls outside the range of 2xx cause this function to trigger
+  // Do something with response error
+  return Promise.reject(error)
+})
+
+// 处理后端返回的数据中包含超出js安全整数范围
 request.defaults.transformResponse = [function (data) {
 //   return data ? JSONbig.parse(data) : {}
   try {
