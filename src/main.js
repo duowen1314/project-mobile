@@ -19,7 +19,9 @@ import {
   Toast,
   Loading,
   Tabbar,
-  TabbarItem
+  TabbarItem,
+  Tab,
+  Tabs
 } from 'vant'// 按需注册 Vant 组件
 
 // 链式使用
@@ -36,6 +38,8 @@ Vue
   .use(Loading)
   .use(Tabbar)
   .use(TabbarItem)
+  .use(Tab)
+  .use(Tabs)
 
 Vue.config.productionTip = false
 
