@@ -59,11 +59,12 @@ export default {
     return {
       isLoading: false,
       user: {
-        mobile: '15210427152',
+        mobile: '15210427125',
         code: '246810'
       }
     }
   },
+
   methods: {
     // ...mapMutations(['setUser']),
     // 登录请求
@@ -81,10 +82,9 @@ export default {
         const { data } = await login(this.user) // ?
         console.log(data)
         // 登录成功后 设置token
-        // this.setUser(data.data)
-        this.$store.commit('setUser', data.data)
-
         this.$toast.success('登录成功')
+        this.$router.push('/')
+        this.$store.commit('setUser', data.data)
       } catch (err) {
         if (err.response && err.response.status === 400) {
           this.$toast.fail('登录失败，手机号或验证码错误')

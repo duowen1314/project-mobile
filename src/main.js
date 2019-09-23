@@ -7,6 +7,8 @@ import zhCN from 'vee-validate/dist/locale/zh_CN' // 加载验证插件的语言
 import * as rules from 'vee-validate/dist/rules'
 import './assets/fonts/iconfont.css'
 import './styles/index.css'
+import { relativetime } from './utils/date'
+// 按需注册 Vant 组件
 import {
   Button,
   Icon,
@@ -21,8 +23,18 @@ import {
   Tabbar,
   TabbarItem,
   Tab,
-  Tabs
-} from 'vant'// 按需注册 Vant 组件
+  Tabs,
+  List,
+  PullRefresh,
+  Image,
+  Grid,
+  GridItem,
+  Lazyload,
+  Popup
+} from 'vant'
+
+// 将时间注册为全局过滤器
+Vue.filter('relativetime', relativetime)
 
 // 链式使用
 Vue
@@ -40,6 +52,13 @@ Vue
   .use(TabbarItem)
   .use(Tab)
   .use(Tabs)
+  .use(List)
+  .use(PullRefresh)
+  .use(Image)
+  .use(Grid)
+  .use(GridItem)
+  .use(Lazyload)
+  .use(Popup)
 
 Vue.config.productionTip = false
 
