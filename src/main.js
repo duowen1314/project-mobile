@@ -30,7 +30,8 @@ import {
   Grid,
   GridItem,
   Lazyload,
-  Popup
+  Popup,
+  Search
 } from 'vant'
 
 // 将时间注册为全局过滤器
@@ -59,6 +60,7 @@ Vue
   .use(GridItem)
   .use(Lazyload)
   .use(Popup)
+  .use(Search)
 
 Vue.config.productionTip = false
 

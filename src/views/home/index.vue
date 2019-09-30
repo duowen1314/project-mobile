@@ -1,6 +1,11 @@
 <template>
   <div class="home">
-    <van-nav-bar title="首页" fixed />
+    <van-nav-bar  fixed>
+        <van-button @click="$router.push('/search')" class="btn-search" color="#5babfb" size="small" round slot="title" type="info">
+             搜索
+        </van-button>
+
+    </van-nav-bar>
     <!-- 频道列表 -->
     <van-tabs v-model="active">
       <van-tab v-for="channel in channels" :key="channel.id" :title="channel.name">
@@ -60,26 +65,34 @@
       </van-tab>
       <!-- 面包按钮 -->
       <div slot="nav-right" class="wap-nav" @click="show = true">
-          <van-icon name="wap-nav" />
+        <van-icon name="wap-nav" />
       </div>
     </van-tabs>
     <!-- /频道列表 -->
     <!-- 编辑频道 -->
-    <van-popup
-     v-model="show"
-     round
-     position="bottom"
-     :style="{ height: '95%' }"
-      >
-      <channel-edit></channel-edit>
-      </van-popup>
+    <van-popup v-model="show" round position="bottom" :style="{ height: '95%' }">
+      <channel-edit
+        @addChannel="onAddChannels"
+        :channelsEdit="channels"
+        :remainingChannels="remainingChannels"
+        :allChannelList="allChannels"
+        @close="show = false"
+        @putChannel="onUserChannelClick"
+      ></channel-edit>
+    </van-popup>
     <!-- /编辑频道 -->
   </div>
 </template>
 
 <script>
 import ChannelEdit from '../../components/channel-edit.vue'
-import { getAllChannels } from '@/api/channel'
+import {
+  getUserOrDefaultChannels,
+  getAllChannels,
+  resetUserChannels,
+  delUserChannels
+} from '@/api/channel'
+import { getItem, setItem } from '@/utils/storage.js'
 // import { getArticles } from '@/api/article'
 import request from '@/utils/request'
 export default {
@@ -90,19 +103,81 @@ export default {
   data () {
     return {
       show: false, // 弹出展示
-      active: 0,
-      channels: [],
-      finished: false,
-      loading: false
+      active: 0, // 频道列表激活状态
+      channels: [], // 推荐频道，用户自己的频道列表
+      allChannels: [], // 全部频道
+      finished: false, // 频道列表文字加载完成状态
+      loading: false // 频道列表loading加载状态
     }
   },
   computed: {
+
+    // 获取当前点击的频道列表
     currentChannel () {
       // active是动态
       return this.channels[this.active]
+    },
+    remainingChannels () {
+      // 剩余频道 = 所有频道 - 我的频道
+      const channels = []
+      this.allChannels.forEach(channel => {
+        // 获取剩余频道
+        const index = this.channels.findIndex(item => {
+          return item.id === channel.id
+        })
+        if (index === -1) {
+          channels.push(channel)
+        }
+      })
+      return channels
     }
+    // 获取剩余频道列表
+
   },
   methods: {
+    //  我的频道中点击处理函数
+    async onUserChannelClick (channel, index, isEdit) {
+      // 如果是编辑状态，删除频道
+      if (isEdit) {
+        // 删除频道
+        this.channels.splice(index, 1) // 将数据从视图移除
+        if (this.$store.state.user) {
+          // 已登录，请求删除
+          await delUserChannels(channel.id)
+        } else {
+          // 未登录，删除本地存储
+          setItem('channels', this.channels) // 重新存储频道列表
+        }
+      } else {
+        // 如果是完成状态，切换频道
+        this.active = index
+        this.show = false // 关闭弹层
+      }
+    },
+    //   添加频道
+    async onAddChannels (value) {
+      console.log(value)
+      this.channels.push(value)
+      //   持久化
+      if (this.$store.state.user) {
+        // 已登录：请求保存到后端
+        // [{id:频道id,seq:序号},{id:频道id,seq:序号}]
+        const channels = []
+        //   不包括第一个（推荐）
+        this.channels.slice(1).forEach((item, index) => {
+          channels.push({
+            id: item.id,
+            seq: index + 2
+          })
+        })
+        //   请求重置
+        await resetUserChannels(channels)
+      } else {
+        setItem('channels', this.channels)
+      }
+
+      // 为登录：本地存储
+    },
     //   下拉刷新
     async onRefresh () {
       const currentChannel = this.currentChannel
@@ -125,9 +200,11 @@ export default {
       currentChannel.pullDownRefresh = false
       this.$toast('刷新成功')
     },
-    //   1.加载文章频道
+
+    // 加载全部的频道列表
     async loadAllChannels () {
       const { data } = await getAllChannels()
+      console.log(data)
       data.data.channels.forEach(function (channel) {
         channel.articles = [] // 频道文章
         channel.loading = false // 频道加载
@@ -135,9 +212,56 @@ export default {
         channel.timestamp = null // 获取下一页的时间戳
         channel.pullDownRefresh = false // 下拉刷新
       })
-      this.channels = data.data.channels
+      this.allChannels = data.data.channels
+    },
 
-      console.log(this.channels)
+    //   1.加载用户自己的文章频道
+    async loadUserAllChannels () {
+      /**
+         *  这是获取全部频道列表，
+        因为每个用户频道列表不同，
+        所以应该调用用户的自己的频道列表
+         * */
+      //   const { data } = await getAllChannels()
+
+      /**
+       * 判断有没有登录
+       * 1.登录 请求接口获取用户频道列表
+       * 2.没有登录
+       *   查看本地存储有无频道列表，
+       *     2-1. 有从本地存储中获取频道列表
+       *     2-2. 没有则请求默认推荐的频道列表
+       *
+       * */
+      let channels = []
+      // 1.如果用户登录，怎获取用户频道列表
+      if (this.$store.state.user) {
+        const { data } = await getUserOrDefaultChannels()
+        channels = data.data.channels
+        console.log(data)
+      } else {
+        // 2.如果没有登录，查看本地存储里是否有频道列表
+        let localChannel = getItem('channels')
+        if (localChannel) {
+          // 如果本地存储有，则获取使用
+          channels = localChannel
+        } else {
+          // 如果本地存储没有，则使用默认推荐频道列表
+          const { data } = await getUserOrDefaultChannels()
+          channels = data.data.channels
+        }
+      }
+
+      channels.forEach(function (channel) {
+        channel.articles = [] // 频道文章
+        channel.loading = false // 频道加载
+        channel.finished = false // 频道加载结束状态
+        channel.timestamp = null // 获取下一页的时间戳
+        channel.pullDownRefresh = false // 下拉刷新
+      })
+      this.channels = channels
+
+      //   console.log(this.channels)
     },
     // 2.加载文章列表
     async onLoad () {
@@ -168,23 +292,27 @@ export default {
     }
   },
   created () {
-    this.loadAllChannels()
+    this.loadUserAllChannels() // 加载用户自己的频道列表
+    this.loadAllChannels() // 加载全部的频道列表
   }
 }
 </script>
 
 <style lang="less" scoped>
 .home {
+    .btn-search{
+        width:100%
+    }
   /deep/ .van-tabs {
-      .wap-nav{
-          position:sticky;
-          right:0;
-          display: flex;
-          align-items: center;
-          background:#fff;
-          opacity: 0.8;
-          font-size:22px;
-      }
+    .wap-nav {
+      position: sticky;
+      right: 0;
+      display: flex;
+      align-items: center;
+      background: #fff;
+      opacity: 0.8;
+      font-size: 22px;
+    }
     .van-tabs__wrap {
       position: fixed;
       left: 0;

@@ -20,3 +20,51 @@ export const getArticles = ({
     }
   })
 }
+
+/**
+ * 获取文章详情
+ * */
+
+export const getArticle = articleId => {
+  return request({
+    method: 'get',
+    url: `/app/v1_0/articles/${articleId}`
+  })
+}
+
+// 对文章点赞
+export const likings = (articleId) => {
+  return request({
+    method: 'post',
+    url: '/app/v1_0/article/likings',
+    data: {
+      target: articleId
+    }
+  })
+}
+// 对文章取消点赞
+export const dislikes = (articleId) => {
+  return request({
+    method: 'delete',
+    url: `/app/v1_0/article/dislikes/${articleId}`
+
+  })
+}
+// 对文章不喜欢
+export const nolike = (articleId) => {
+  return request({
+    method: 'post',
+    url: '/app/v1_0/article/dislikes',
+    data: {
+      target: articleId
+    }
+  })
+}
+// 取消对文章不喜欢
+export const cancelLike = (articleId) => {
+  return request({
+    method: 'delete',
+    url: `/app/v1_0/article/dislikes/${articleId}`
+
+  })
+}

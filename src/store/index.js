@@ -13,7 +13,8 @@ export default new Vuex.Store({
       state.user = user
       // 为了防止页面属性数据丢失，所以还需要将数据存储在本地存储
       setItem('user', state.user)
-      console.log(JSON.parse(getItem('user')))
+      // console.log(JSON.parse(getItem('user')))
+      console.log(getItem('user'))
     }
   },
   actions: {
