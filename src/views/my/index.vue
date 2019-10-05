@@ -9,27 +9,32 @@
       <!-- 未登录 -->
       <!-- 用户信息 -->
       <van-cell-group class="login-state" v-else>
-        <van-cell is-link  class="userPhoto" :border="false">
+        <van-cell is-link @click="$router.push('/user')"  class="userPhoto" :border="false">
             <div slot="title" class="baseInfo">
-                <img src="http://toutiao.meiduo.site/FgSTA3msGyxp5-Oufnm5c0kjVgW7" alt="" class="photo">
-                <span>只是为了好玩</span>
+                <van-image
+                width="60"
+                height="60"
+                round
+                :src="userInfo.photo"
+                />
+                <span>{{userInfo.name}}</span>
             </div>
         </van-cell>
         <van-grid :border="false">
             <van-grid-item>
-                <span class="count">1</span>
+                <span class="count">{{userInfo.art_count}}</span>
                 <span class="text">头条</span>
             </van-grid-item>
             <van-grid-item>
-                <span class="count">3</span>
+                <span class="count">{{userInfo.follow_count}}</span>
                 <span class="text">关注</span>
             </van-grid-item>
             <van-grid-item>
-                <span class="count">4</span>
+                <span class="count">{{userInfo.fans_count}}</span>
                 <span class="text">粉丝</span>
             </van-grid-item>
             <van-grid-item>
-                <span class="count">2</span>
+                <span class="count">{{userInfo.like_count}}</span>
                 <span class="text">获赞</span>
             </van-grid-item>
         </van-grid>
@@ -49,8 +54,24 @@
 </template>
 
 <script>
+import { getMyInfo } from '@/api/user'
 export default {
-  name: 'UserIndex'
+  name: 'UserIndex',
+  data () {
+    return {
+      userInfo: {}
+    }
+  },
+  created () {
+    this.getUserInfo()
+  },
+  methods: {
+    async getUserInfo () {
+      const { data } = await getMyInfo()
+      console.log(data)
+      this.userInfo = data.data
+    }
+  }
 
 }
 </script>
@@ -58,9 +79,7 @@ export default {
 <style lang="less" scoped>
 
     .userInfo{
-        .login-state{
-            margin-bottom: 100px;
-        }
+
         .not-login{
             height: 200px;
             display:flex;
@@ -83,12 +102,6 @@ export default {
                 display: flex;
                 align-items: center;
                 font-size:18px;
-                img{
-                    width:60px;
-                    height: 60px;
-                    border-radius: 100%;
-                    margin-right: 20px;
-                }
 
             }
         }

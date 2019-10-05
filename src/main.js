@@ -31,7 +31,10 @@ import {
   GridItem,
   Lazyload,
   Popup,
-  Search
+  Search,
+  Dialog,
+  ActionSheet,
+  DatetimePicker
 } from 'vant'
 
 // 将时间注册为全局过滤器
@@ -61,6 +64,9 @@ Vue
   .use(Lazyload)
   .use(Popup)
   .use(Search)
+  .use(Dialog)
+  .use(ActionSheet)
+  .use(DatetimePicker)
 
 Vue.config.productionTip = false
 

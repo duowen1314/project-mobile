@@ -15,6 +15,11 @@ export const relativetime = dateTime => {
   return dayjs().from(dayjs(dateTime))
 }
 
+// 格式化日期对象
+export const formatDate = date=>{
+  return dayjs(date).format('YYYY-MM-DD')
+}
+
 // dayjs().format('YYYY/MM/DD')
 // dayjs().from(dayjs('1990')) // 2 年以前
 // dayjs().from(dayjs(), true) // 2 年

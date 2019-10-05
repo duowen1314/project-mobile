@@ -7,6 +7,7 @@ import Search from '@/views/search'
 import SearchResult from '@/views/search-result'
 import Article from '@/views/article'
 import My from '@/views/my'
+import User from '@/views/user'
 
 Vue.use(VueRouter)
 
@@ -32,6 +33,11 @@ const router = new VueRouter({
       name: 'article', // 文章详情页
       path: '/article/:articleId',
       component: Article
+    },
+    {
+      name: 'user', // 用户信息
+      path: '/user',
+      component: User
     },
     {
       // 首页一级路由tabar
